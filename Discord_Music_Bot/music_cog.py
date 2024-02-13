@@ -38,6 +38,19 @@ class music_cog(commands.Cog):
             self.vc[id] = None
             self.is_paused[id] = self.is_playing[id] = False
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        id = int(member.guild.id)
+        if member.id != self.bot.user.id and before.channel != None and after.channel != before.channel:
+            remainingChannelMembers = before.channel.members
+            if len(remainingChannelMembers) == 1 and remainingChannelMembers[0].id == self.user.id and self.vc[id].is_connected():
+                self.is_playing[id] = False
+                self.is_paused[id] = False
+                self.musicQueue[id] = []
+                self.queueIndex[id] = 0
+                await self.vc[id].disconnect()
+
+
     def now_playing_embed(self, ctx, song):
         title = song['title']
         link = song['link']
@@ -46,13 +59,14 @@ class music_cog(commands.Cog):
         avatar = author.avatar_url
 
         embed = discord.Embed(
-            title = "Сейчас поёт:"
-            description = f'[{title}]({link})'
-            colour = self.embedBlue
+            title = "Сейчас поёт:",
+            description = f'[{title}]({link})',
+            colour = self.embedBlue,
         )
         embed.set_thumbail(url=thumbnail)
         embed.set_footer(text=f'Песня добавлена ​​пользователем: {str(author)}, icon_url=avatar')
         return embed
+    
     async def join_VC(self, ctx, channel):
         id = int(ctx.guild.id)
         if self.vc[id] == None or self.vs[id].is_connected():
@@ -123,3 +137,31 @@ class music_cog(commands.Cog):
             await ctx.send("В очереди на воспроизведение нет песен!")
             self.queueIndex[id] += 1
             self.is_playing[id] = False
+#join and leave
+    @ commands.command(
+        name = "join",
+        aliases=["j"],
+        help=""
+    )
+    async def join(self, ctx):
+        if ctx.author.voice:
+            userChannel = ctx.author.voice.channel
+            await self.join_VC(ctx, userChannel)
+            await ctx.send(f'Music8_byAvetto вошел в канал: {userChannel}')
+        else:
+            await ctx.send("Вам нужно находиться в голосовом канале!")
+
+    @ commands.command(
+        name = "leave",
+        aliases=["l"],
+        help=""
+    )
+    async def leave(self, ctx):
+        id = int(ctx.guild.id)
+        self.is_playing[id] = False
+        self.is_paused[id] = False
+        self.musicQueue[id] = []
+        self.queueIndex[id] = 0
+        if self.vc[id] != None:
+            await ctx.send("Music8_byAvetto покинул голосовой канал!")
+            await self.vc[id].disconnect()
