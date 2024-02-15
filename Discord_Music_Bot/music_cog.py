@@ -9,7 +9,11 @@ import json
 import os
 from youtube_dl import YoutubeDL
 
+
+
+
 class music_cog(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -28,7 +32,8 @@ class music_cog(commands.Cog):
 
         self.vc = {}
 
-#search and read       
+
+#ready      
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
@@ -38,17 +43,18 @@ class music_cog(commands.Cog):
             self.vc[id] = None
             self.is_paused[id] = self.is_playing[id] = False
 
+#leave if all leave
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         id = int(member.guild.id)
         if member.id != self.bot.user.id and before.channel != None and after.channel != before.channel:
             remainingChannelMembers = before.channel.members
-            if len(remainingChannelMembers) == 1 and remainingChannelMembers[0].id == self.user.id and self.vc[id].is_connected():
-                self.is_playing[id] = False
-                self.is_paused[id] = False
+            if len(remainingChannelMembers) == 1 and remainingChannelMembers[0].id == self.bot.user.id and self.vc[id].is_connected():
+                self.is_playing[id] = self.is_paused[id] = False
                 self.musicQueue[id] = []
                 self.queueIndex[id] = 0
                 await self.vc[id].disconnect()
+                self.vc[id] = None
 
 
     def now_playing_embed(self, ctx, song):
@@ -64,14 +70,13 @@ class music_cog(commands.Cog):
             colour = self.embedBlue,
         )
         embed.set_thumbail(url=thumbnail)
-        embed.set_footer(text=f'Песня добавлена ​​пользователем: {str(author)}, icon_url=avatar')
+        embed.set_footer(text=f'Песню добавил: {str(author)}, icon_url=avatar')
         return embed
     
     async def join_VC(self, ctx, channel):
         id = int(ctx.guild.id)
-        if self.vc[id] == None or self.vs[id].is_connected():
+        if self.vc[id] == None or not self.vc[id].is_connected():
             self.vc[id] = await channel.connect()
-
             if self.vc[id] == None:
                 await ctx.send("Не удалось подключится к голосовому каналу!")
                 return
@@ -83,6 +88,7 @@ class music_cog(commands.Cog):
         htmlContent = request.urlopen('http://www.youtube.com/results?' + queryString)
         searchResults = re.findall('/watch\?v=(.{11})', htmlContent.read().decode())
         return searchResults[0:10]
+    
     def extract_YT(self, url):
         with YoutubeDL(self.YTDL_OPTIONS) as ydl:
             try:
@@ -95,7 +101,8 @@ class music_cog(commands.Cog):
             'source': info['formats'][0]['url'],
             'title': info['title']
         }
-#Playing    
+    
+    
     def play_next(self, ctx):
         id = int(ctx.guild.id)
         if not self.is_playing[id]:
@@ -137,7 +144,8 @@ class music_cog(commands.Cog):
             await ctx.send("В очереди на воспроизведение нет песен!")
             self.queueIndex[id] += 1
             self.is_playing[id] = False
-#join and leave
+
+#join command
     @ commands.command(
         name = "join",
         aliases=["j"],
@@ -150,7 +158,7 @@ class music_cog(commands.Cog):
             await ctx.send(f'Music8_byAvetto вошел в канал: {userChannel}')
         else:
             await ctx.send("Вам нужно находиться в голосовом канале!")
-
+#leave command
     @ commands.command(
         name = "leave",
         aliases=["l"],
@@ -158,10 +166,11 @@ class music_cog(commands.Cog):
     )
     async def leave(self, ctx):
         id = int(ctx.guild.id)
-        self.is_playing[id] = False
-        self.is_paused[id] = False
+        self.is_playing[id] = self.is_paused[id] = False
         self.musicQueue[id] = []
         self.queueIndex[id] = 0
         if self.vc[id] != None:
-            await ctx.send("Music8_byAvetto покинул голосовой канал!")
             await self.vc[id].disconnect()
+            await ctx.send("Music8_byAvetto покинул голосовой канал!")
+            self.vc[id] = None
+      
