@@ -9,6 +9,8 @@ import json
 import os
 from youtube_dl import YoutubeDL
 
+# from discord import utils
+
 
 
 
@@ -49,7 +51,7 @@ class music_cog(commands.Cog):
         id = int(member.guild.id)
         if member.id != self.bot.user.id and before.channel != None and after.channel != before.channel:
             remainingChannelMembers = before.channel.members
-            if len(remainingChannelMembers) == 1 and remainingChannelMembers[0].id == self.bot.user.id and self.vc[id].is_connected():
+            if len(remainingChannelMembers) == 1 and remainingChannelMembers[0].id == self.bot.user.id:
                 self.is_playing[id] = self.is_paused[id] = False
                 self.musicQueue[id] = []
                 self.queueIndex[id] = 0
@@ -169,7 +171,9 @@ class music_cog(commands.Cog):
         self.is_playing[id] = self.is_paused[id] = False
         self.musicQueue[id] = []
         self.queueIndex[id] = 0
+        # self.vc[id] = ctx.voice_client
         if self.vc[id] != None:
+            # print(self.vc[id])
             await self.vc[id].disconnect()
             await ctx.send("Music8_byAvetto покинул голосовой канал!")
             self.vc[id] = None
