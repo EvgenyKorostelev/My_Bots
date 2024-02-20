@@ -14,6 +14,7 @@ from youtube_dl import YoutubeDL
 
 
 
+
 class music_cog(commands.Cog):
 
     def __init__(self, bot):
@@ -31,6 +32,7 @@ class music_cog(commands.Cog):
         self.embedBlue = 0x2c76dd
         self.embedRed = 0xdf1141
         self.embedGreen = 0x0eaa51
+        # self.embedMyColor = 0x290000
 
         self.vc = {}
 
@@ -55,8 +57,9 @@ class music_cog(commands.Cog):
                 self.is_playing[id] = self.is_paused[id] = False
                 self.musicQueue[id] = []
                 self.queueIndex[id] = 0
+                # self.vc[id] = ctx.guild.voice_client
                 await self.vc[id].disconnect()
-                self.vc[id] = None
+                # self.vc[id] = None
 
 
     def now_playing_embed(self, ctx, song):
@@ -105,7 +108,7 @@ class music_cog(commands.Cog):
         }
     
     
-    def play_next(self, ctx):
+    async def play_next(self, ctx):
         id = int(ctx.guild.id)
         if not self.is_playing[id]:
             return
@@ -171,10 +174,10 @@ class music_cog(commands.Cog):
         self.is_playing[id] = self.is_paused[id] = False
         self.musicQueue[id] = []
         self.queueIndex[id] = 0
-        # self.vc[id] = ctx.voice_client
+        # self.vc[id] = ctx.guild.voice_client
         if self.vc[id] != None:
             # print(self.vc[id])
             await self.vc[id].disconnect()
             await ctx.send("Music8_byAvetto покинул голосовой канал!")
-            self.vc[id] = None
+            # self.vc[id] = None
       

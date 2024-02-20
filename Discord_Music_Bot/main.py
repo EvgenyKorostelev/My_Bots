@@ -8,6 +8,6 @@ bot = ComponentsBot(command_prefix = '+')
 
 bot.add_cog(music_cog(bot))
 
-with open('D:/token.txt', 'r') as file:
+with open('token.txt', 'r') as file:
     token = file.readlines()[0]
 bot.run(token)
