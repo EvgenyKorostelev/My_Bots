@@ -316,7 +316,6 @@ paket-files/
 
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
-D:\My_Bots\Discord_Music_Bot/
 *.pyc
 
 # Cake - Uncomment if you are using it
