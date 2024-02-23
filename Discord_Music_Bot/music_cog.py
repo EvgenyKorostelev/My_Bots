@@ -106,6 +106,16 @@ class music_cog(commands.Cog):
         else:
             await self.vc[id].move_to(channel)
 
+    def get_YT_title(self, videoID):        
+        params = {"format": "json", "url": "http://www.youtube.com/watch?v=%s" % videoID}
+        url = "http://www.youtube.com/oemed"
+        queryString = parse.urlencode(params)
+        url = url + "?" + queryString
+        with request.urlopen(url) as response:
+            responseText = response.read()
+            data = json.loads(responseText.decode())
+            return data['title']
+
     def search_YT(self, search):
         queryString = parse.urlencode({'search_query': search})
         htmContent = request.urlopen('http://www.youtube.com/results?' + queryString)
@@ -222,7 +232,7 @@ class music_cog(commands.Cog):
         if not args:
             await ctx.send("Укажите песню, которую нужно добавить в очередь")
         else: 
-            song = self.extract_YT(self.search_YT(search)][0])
+            song = self.extract_YT(self.search_YT(search)[0])
             if type(song) == type(False):
                 await ctx.send("НЕ нашел! Попробуйте другую фразу для поиска.")
                 return
@@ -231,6 +241,116 @@ class music_cog(commands.Cog):
                 message = self.added_song_embed(ctx, song)
                 await ctx.send(embed=message)
         
+#search command
+    @ commands.command(
+        name = "search",
+        aliases=["find","sr"],
+        help=""
+    )
+    async def search(self, ctx, *args):
+        search = "".join(args)
+        songNames = []
+        selectionOptions = []
+        embedText = ""
+
+        if not args:
+            await ctx.send("Укажите условия поиска")
+            return
+        try:
+            userChannel = ctx.author.voice.channel
+        except:
+            await ctx.send("Вы должны находиться в голосовом канале")
+            return
+
+        await ctx.send("Получение результатов поиска . . .")
+
+        songTokens = self.search_YT(search)
+
+        for i, token in enumerate(songTokens):
+            url = 'http://www.youtube.com/watch?v=' + token
+            name = self.get_YT_title(token)
+            songNames.append(name)
+            embedText += f"{i+1} - [{name}]({url})\n"
+        for i, title in enumerate(songNames):
+            selectionOptions.append(SelectOption(
+                label=f"{i+1} - {title[:95]}", value=i))
+
+        searchResults = discord.Embed(
+            title="Результаты поиска",
+            description=embedText,
+            colour=self.embedRed
+        )
+        selectionComponents = [
+            Select(
+                placeholder="Опции выбора",
+                options=selectionOptions
+            ),
+            Button(
+                label = "Отменить",
+                custom_id = "Отменить",
+                style = 4
+            )
+        ]
+        message = await ctx.send(embed = searchResults, components = selectionComponents)
+        try:
+            tasks = [
+                asyncio.create_task(self.bot.wait_for(
+                    "button_click",
+                    timeout = 60.0,
+                    check = None
+                ),name = "button"),
+                asyncio.create_task(self.bot.wait_for(
+                    "select_option",
+                    timeout = 60.0,
+                    check = None
+                ),name = "select")
+            ]
+            done, pending = await asyncio.wait(tasks, return_when = asyncio.FIRST_COMPLETED)
+            finished = list(done)[0]
+
+            for task in pending:
+                try:
+                    task.cancel()
+                except asyncio.CancelledError:
+                    pass
+
+            if finished == None:
+                searchResults.title = "НЕ найдено"
+                searchResults.description = ""
+                await message.delete()
+                await ctx.send(embed = searchResults)
+                return
+            
+            action = finished.get_name()
+
+            if action =="button":
+                searchResults.title = "НЕ найдено"
+                searchResults.description = ""
+                await message.delete()
+                await ctx.send(embed = searchResults)
+            elif action == "select":
+                result = finished.result()
+                chosenIndex = int(result.values[0])
+                songRef = self.extract_YT(songTokens[chosenIndex])
+                if type(songRef) == type(True):
+                    await ctx.send("НЕверный формат! Попробуйте другую фразу для поиска.")
+                    return
+                embedReponse = discord.Embed(
+                    title = f"Опция #{chosenIndex + 1} выбрана",
+                    description = f"[{songRef['title']}]({songRef['link']}) добавлены в очередь!",
+                    colour = self.embedRed
+                )
+                embedReponse.set_thumbnail(url=songRef['thumbnail'])
+                await message.delete()
+                await ctx.send(embed=embedReponse)
+                self.musicQueue[ctx.guild.id].append([songRef, userChannel])
+        except:
+            searchResults.title = "НЕ найдено"
+            searchResults.description = ""
+            await message.delete()
+            await ctx.send(embed = searchResults)
+
+
 
 #pause command
     @ commands.command(
