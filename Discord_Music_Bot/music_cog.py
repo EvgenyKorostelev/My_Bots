@@ -94,6 +94,24 @@ class music_cog(commands.Cog):
         embed.set_thumbnail(url=thumbnail)
         embed.set_footer(text=f'Песню добавил: {str(author)}, icon_url=avatar')
         return embed
+    
+# remove song 
+    def removed_song_embed(self, ctx, song):
+        title = song['title']
+        link = song['link']
+        thumbnail = song['thumbnail']
+        author = ctx.author
+        avatar = author.avatar.url
+
+        embed = discord.Embed(
+            title = "Удалена из очереди:",
+            description = f'[{title}]({link})',
+            colour = self.embedRed,
+        )
+        embed.set_thumbnail(url=thumbnail)
+        embed.set_footer(
+            text=f'Песню удалил: {str(author)}, icon_url=avatar')
+        return embed
 
     
     async def join_VC(self, ctx, channel):
@@ -241,6 +259,34 @@ class music_cog(commands.Cog):
                 message = self.added_song_embed(ctx, song)
                 await ctx.send(embed=message)
         
+#remove command
+    @ commands.command(
+        name = "remove",
+        aliases=["rm"],
+        help=""
+    )
+    async def remove(self, ctx):
+        id = int(ctx.guild.id)
+        if self.musicQueue[id] != []:
+            song = self.musicQueue[id][-1][0]
+            removeSongEmbed =  self.removed_song_embed(ctx, song)
+            await ctx.send(embed=removeSongEmbed)
+        else:
+            await ctx.send("В очереди НЕТ песен")
+        self.musicQueue[id] = self.musicQueue[id][:-1]
+        if self.musicQueue[id] == []:
+            if self.vc[id] != None and self.is_playing[id]:
+                self.is_playing[id] = self.is_paused[id] = False
+                await self.vc[id].disconnect()
+                self.vc[id] = None
+            self.queueIndex[id] = 0
+        elif self.queueIndex[id] == len(self.musicQueue[id]) and self.vc[id] != None and self.vc[id]:
+            self.vc[id].pause()
+            self.queueIndex[id] -= 1
+            await self.play_music(ctx)
+            
+            
+
 #search command
     @ commands.command(
         name = "search",
