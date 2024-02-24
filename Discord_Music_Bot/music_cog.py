@@ -9,10 +9,6 @@ import json
 import os
 from youtube_dl import YoutubeDL
 
-# from discord import utils
-
-
-
 
 
 class music_cog(commands.Cog):
@@ -36,7 +32,7 @@ class music_cog(commands.Cog):
 
         self.vc = {}
 
-
+# FUNCTIONS
 #ready      
     @commands.Cog.listener()
     async def on_ready(self):
@@ -113,7 +109,7 @@ class music_cog(commands.Cog):
             text=f'Песню удалил: {str(author)}, icon_url=avatar')
         return embed
 
-    
+# join to channel    
     async def join_VC(self, ctx, channel):
         id = int(ctx.guild.id)
         if self.vc[id] == None or not self.vc[id].is_connected():
@@ -124,6 +120,7 @@ class music_cog(commands.Cog):
         else:
             await self.vc[id].move_to(channel)
 
+# title
     def get_YT_title(self, videoID):        
         params = {"format": "json", "url": "http://www.youtube.com/watch?v=%s" % videoID}
         url = "http://www.youtube.com/oemed"
@@ -133,7 +130,8 @@ class music_cog(commands.Cog):
             responseText = response.read()
             data = json.loads(responseText.decode())
             return data['title']
-
+        
+# search in Youtube
     def search_YT(self, search):
         queryString = parse.urlencode({'search_query': search})
         htmContent = request.urlopen('http://www.youtube.com/results?' + queryString)
@@ -153,7 +151,7 @@ class music_cog(commands.Cog):
             'title': info['title']
         }
     
-    
+# play next song    
     async def play_next(self, ctx):
         id = int(ctx.guild.id)
         if not self.is_playing[id]:
@@ -177,6 +175,7 @@ class music_cog(commands.Cog):
             self.queueIndex[id] += 1
             self.is_playing[id] = False
 
+# play music
     async def play_music(self, ctx):
         id = int(ctx.guild.id)
         if self.queueIndex[id] < len(self.musicQueue[id]):
@@ -196,7 +195,8 @@ class music_cog(commands.Cog):
             self.queueIndex[id] += 1
             self.is_playing[id] = False
 
-#play command
+# COMMANDS
+# play command
     @ commands.command(
         name = "play",
         aliases=["pl"],
@@ -234,7 +234,8 @@ class music_cog(commands.Cog):
                 else:
                     message = self.added_song_embed(ctx, song)
                     await ctx.send(embed=message)
-#add command
+
+# add song command
     @ commands.command(
         name = "add",
         aliases=["a"],
@@ -259,7 +260,7 @@ class music_cog(commands.Cog):
                 message = self.added_song_embed(ctx, song)
                 await ctx.send(embed=message)
         
-#remove command
+# remove command
     @ commands.command(
         name = "remove",
         aliases=["rm"],
@@ -284,10 +285,8 @@ class music_cog(commands.Cog):
             self.vc[id].pause()
             self.queueIndex[id] -= 1
             await self.play_music(ctx)
-            
-            
 
-#search command
+# search command
     @ commands.command(
         name = "search",
         aliases=["find","sr"],
@@ -396,9 +395,7 @@ class music_cog(commands.Cog):
             await message.delete()
             await ctx.send(embed = searchResults)
 
-
-
-#pause command
+# pause command
     @ commands.command(
         name = "pause",
         aliases=["stop","pa"],
@@ -414,7 +411,7 @@ class music_cog(commands.Cog):
             self.is_paused[id] = True
             self.vc[id].pause()    
 
-#resume command
+# resume command
     @ commands.command(
         name = "resume",
         aliases=["re"],
@@ -430,7 +427,98 @@ class music_cog(commands.Cog):
             self.is_paused[id] = False
             self.vc[id].resume()
 
-#join command
+# previous command
+    @ commands.command(
+        name = "previous",
+        aliases=["pre", "pr"],
+        help=""
+    )
+    async def previous(self, ctx):
+        id = int(ctx.guild.id)
+        if self.vc[id] == None:
+            await ctx.send("Вам нужно находиться в голосовом канале!")
+        elif self.queueIndex[id] <= 0:
+            await ctx.send("В очереди нет предыдущей песни, ")
+            self.vc[id].pause()
+            await self.play_music(ctx)
+        elif self.vc[id] != None and self.vc[id]:
+            self.vc[id].pause()
+            self.queueIndex[id] -= 1
+            await self.play_music(ctx)
+
+# skip command
+    @ commands.command(
+        name = "skip",
+        aliases=["sk"],
+        help=""
+    )
+    async def skip(self, ctx):
+        id = int(ctx.guild.id)
+        if self.vc[id] == None:
+            await ctx.send("Вам нужно находиться в голосовом канале!")
+        elif self.queueIndex[id] >= len(self.musicQueue[id]) - 1:
+            await ctx.send("В очереди нет следующей песни, ")
+            self.vc[id].pause()
+            await self.play_music(ctx)
+        elif self.vc[id] != None and self.vc[id]:
+            self.vc[id].pause()
+            self.queueIndex[id] += 1
+            await self.play_music(ctx)
+
+
+
+
+# queue command
+    @ commands.command(
+        name = "queue",
+        aliases=["list", "q"],
+        help=""
+    )
+    async def queue(self, ctx):
+        id = int(ctx.quild.id)
+        returnValue = ""
+        if self.musicQueue[id] ==[]:
+            await ctx.send("В очереди НЕТ песен")
+            return
+        
+        for i in range(self.queueIndex[id], len(self.musicQueue[id])):
+            upNextSongs = len(self.musicQueue[id]) - self.queueIndex[id]
+            if i > 5 + upNextSongs:
+                break
+            returnIndex = i - self.queueIndex[id]
+            if returnIndex == 0:
+                returnIndex = "Сейчас играет"
+            elif returnIndex == 1:
+                returnIndex = "Следущая"
+            returnValue += f"{returnIndex} - [{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['link']})\n"    
+
+            if returnValue == "":
+                await ctx.send("В очереди НЕТ песен")
+                return
+        queue = discord.Embed(
+            title ="Current Queue",
+            description = returnValue,
+            colour = self.embedGreen
+        )
+        await ctx.send(embed = queue)
+
+# clear queue command
+    @ commands.command(
+        name = "clear",
+        aliases=["cl"],
+        help=""
+    )
+    async def clear(self, ctx):
+        id = int(ctx.quild.id)
+        if self.vc[id] != None and self.is_playing[id]:
+            self.is_playing[id] = self.is_paused[id] = False
+            self.vc[id].stop()
+        if self.musicQueue[id] != []:
+            await ctx.send("Список воспроизведения ОЧИЩЕН")
+            self.musicQueue[id] = []
+        self.queueIndex[id] = 0
+
+# join command
     @ commands.command(
         name = "join",
         aliases=["j"],
@@ -443,7 +531,8 @@ class music_cog(commands.Cog):
             await ctx.send(f'Music8_byAvetto вошел в канал: {userChannel}')
         else:
             await ctx.send("Вам нужно находиться в голосовом канале!")
-#leave command
+
+# leave command
     @ commands.command(
         name = "leave",
         aliases=["l"],
