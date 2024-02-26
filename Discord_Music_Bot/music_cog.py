@@ -53,9 +53,9 @@ class music_cog(commands.Cog):
                 self.is_playing[id] = self.is_paused[id] = False
                 self.musicQueue[id] = []
                 self.queueIndex[id] = 0
-                # self.vc[id] = ctx.guild.voice_client
-                await self.vc[id].disconnect()
-                # self.vc[id] = None
+                self.vc[id] = discord.utils.get(self.bot.voice_clients, guild=member.guild)
+                await self.vc[id].disconnect(force=True)
+                self.vc[id] = None
 
 # now playing
     def now_playing_embed(self, ctx, song):
@@ -540,10 +540,10 @@ class music_cog(commands.Cog):
         self.is_playing[id] = self.is_paused[id] = False
         self.musicQueue[id] = []
         self.queueIndex[id] = 0
-        # self.vc[id] = ctx.guild.voice_client
+        self.vc[id] = ctx.guild.voice_client
         if self.vc[id] != None:
             # print(self.vc[id])
-            await self.vc[id].disconnect()
+            await self.vc[id].disconnect(force=True)
             await ctx.send("Music8_byAvetto покинул голосовой канал!")
             self.vc[id] = None
       
