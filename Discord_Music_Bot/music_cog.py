@@ -33,7 +33,7 @@ class music_cog(commands.Cog):
         self.vc = {}
 
 # FUNCTIONS
-#ready      
+# ready      
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
@@ -43,7 +43,7 @@ class music_cog(commands.Cog):
             self.vc[id] = None
             self.is_paused[id] = self.is_playing[id] = False
 
-#leave if all leave
+# leave if all leave
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         id = int(member.guild.id)
@@ -135,7 +135,7 @@ class music_cog(commands.Cog):
     def search_YT(self, search):
         queryString = parse.urlencode({'search_query': search})
         htmContent = request.urlopen('http://www.youtube.com/results?' + queryString)
-        searchResults = re.findall('/watch\?v=(.{11})', htmContent.read().decode())
+        searchResults = re.findall(r'/watch\?v=(.{11})', htmContent.read().decode())
         return searchResults[0:10]
     
     def extract_YT(self, url):
@@ -312,7 +312,7 @@ class music_cog(commands.Cog):
         songTokens = self.search_YT(search)
 
         for i, token in enumerate(songTokens):
-            url = 'http://www.youtube.com/watch?v=' + token
+            url = 'https://www.youtube.com/watch?v=' + token
             name = self.get_YT_title(token)
             songNames.append(name)
             embedText += f"{i+1} - [{name}]({url})\n"
@@ -435,6 +435,7 @@ class music_cog(commands.Cog):
     )
     async def previous(self, ctx):
         id = int(ctx.guild.id)
+        self.vc[id] = ctx.guild.voice_client
         if self.vc[id] == None:
             await ctx.send("Вам нужно находиться в голосовом канале!")
         elif self.queueIndex[id] <= 0:
@@ -472,7 +473,7 @@ class music_cog(commands.Cog):
         help=" -Перечисляет следующие несколько песен в очереди."
     )
     async def queue(self, ctx):
-        id = int(ctx.quild.id)
+        id = int(ctx.guild.id)
         returnValue = ""
         if self.musicQueue[id] ==[]:
             await ctx.send("В очереди НЕТ песен")
@@ -493,7 +494,7 @@ class music_cog(commands.Cog):
                 await ctx.send("В очереди НЕТ песен")
                 return
         queue = discord.Embed(
-            title ="Current Queue",
+            title ="Песни в очереди",
             description = returnValue,
             colour = self.embedGreen
         )
@@ -506,7 +507,7 @@ class music_cog(commands.Cog):
         help=" -Удаляет все песни из очереди."
     )
     async def clear(self, ctx):
-        id = int(ctx.quild.id)
+        id = int(ctx.guild.id)
         if self.vc[id] != None and self.is_playing[id]:
             self.is_playing[id] = self.is_paused[id] = False
             self.vc[id].stop()
