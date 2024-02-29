@@ -1,16 +1,27 @@
 # Discord_Bot_for_music
-from discord_components import ComponentsBot
 from music_cog import music_cog
 from help_cog import help_cog
+import asyncio
+from discord.ext import commands
+import discord
+# from discord import Activity, ActivityType
+
+# intents = discord.Intents.default()
+# intents.message_content = True
 
 
-bot = ComponentsBot(command_prefix = '+')
+bot = commands.Bot(command_prefix = '+', intents=discord.Intents.all())
 
-bot.remove_command('help')
-
-bot.add_cog(music_cog(bot))
-bot.add_cog(help_cog(bot))
 
 with open('token.txt', 'r') as file:
     token = file.readlines()[0]
-bot.run(token)
+
+
+async def main():
+    async with bot:
+        bot.remove_command('help')
+        await bot.add_cog(music_cog(bot))
+        await bot.add_cog(help_cog(bot))
+        await bot.start(token)
+
+asyncio.run(main())
