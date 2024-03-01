@@ -91,7 +91,7 @@ class music_cog(commands.Cog):
         embed.set_footer(text=f'Песню добавил: {str(AUTHOR)}', icon_url=AVATAR)
         return embed
     
-# remove song+ 
+# remove song + 
     def removed_song_embed(self, ctx, song):
         TITLE = song['title']
         LINK = song['link']
@@ -109,7 +109,7 @@ class music_cog(commands.Cog):
             text = f'Песню удалил: {str(AUTHOR )}', icon_url = AVATAR )
         return embed
 
-# join to channel +-   
+# join to channel +  
     async def join_VC(self, ctx, channel):
         id = int(ctx.guild.id)
         if self.vc[id] == None or not self.vc[id].is_connected():
@@ -131,7 +131,7 @@ class music_cog(commands.Cog):
             data = json.loads(responseText.decode())
             return data['title']
         
-# search in Youtube
+# search in Youtube +
     def search_YT(self, search):
         queryString = parse.urlencode({'search_query': search})
         htmContent = request.urlopen('https://www.youtube.com/results?' + queryString)
@@ -151,8 +151,8 @@ class music_cog(commands.Cog):
             'title': info['title']
         }
     
-# play next song    
-    async def play_next(self, ctx):
+# play next song +   
+    def play_next(self, ctx):
         id = int(ctx.guild.id)
         if not self.is_playing[id]:
             return
@@ -172,10 +172,16 @@ class music_cog(commands.Cog):
             self.vc[id].play(discord.FFmpegPCMAudio(
                 song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next(ctx))
         else:
+            coro = ctx.send("Вы достигли конца очереди!")
+            fut = run_coroutine_threadsafe(coro, self.bot.loop)
+            try:
+                fut.result()
+            except:
+                pass    
             self.queueIndex[id] += 1
             self.is_playing[id] = False
 
-# play music -
+# play music +
     async def play_music(self, ctx):
         id = int(ctx.guild.id)
         if self.queueIndex[id] < len(self.musicQueue[id]):
@@ -183,20 +189,14 @@ class music_cog(commands.Cog):
             self.is_paused[id] = False
             self.vc[id] = await self.join_VC(ctx, self.musicQueue[id][self.queueIndex[id]][1])
             song = self.musicQueue[id][self.queueIndex[id]][0]
-            print("2")
             message = self.now_playing_embed(ctx, song)
-            print("3")
             await ctx.send(embed = message)
-
-            # self.vc[id] = ctx.guild.voice_client
-            # if self.vc[id].is_connected():
-            #     print("a")
-            # else: print("b")   
-
-            print("4")
+            
+            self.vc[id] = ctx.guild.voice_client
+           
             self.vc[id].play(discord.FFmpegPCMAudio(
                 song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next(ctx))
-            print("5")
+            
         else:
             await ctx.send("В очереди на воспроизведение нет песен!")
             self.queueIndex[id] += 1
@@ -221,13 +221,18 @@ class music_cog(commands.Cog):
             if len(self.musicQueue[id]) == 0:
                 await ctx.send("Список воспроизведения пуст!")
                 return
-            elif not self.is_playing[id]:
+            elif not self.is_playing[id] and not self.is_paused[id]:
                 if self.musicQueue[id] == None or self.vc[id] == None:
                     await self.play_music(ctx)
                 else:
                     self.is_paused[id] = False
                     self.is_playing[id] = True
-                    self.vc[id].resume()
+                    await self.play_music(ctx)
+            elif not self.is_playing[id] and self.is_paused[id]:
+                self.is_playing[id] = True
+                self.is_paused[id] = False
+                self.vc[id].resume()
+                await ctx.send("Возобновлено")
             else:
                 return
         else:
@@ -246,7 +251,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "add",
         aliases=["a"],
-        help=" -Добавляет первый результат поиска в очередь"
+        help=" -Добавляет первый результат поиска в очередь."
     )
     async def add(self, ctx, *args):
         search = " ".join(args)
@@ -271,7 +276,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "remove",
         aliases=["rm"],
-        help=" -Удаляет последнюю песню в очереди"
+        help=" -Удаляет последнюю песню в очереди."
     )
     async def remove(self, ctx):
         id = int(ctx.guild.id)
@@ -293,153 +298,155 @@ class music_cog(commands.Cog):
             self.queueIndex[id] -= 1
             await self.play_music(ctx)
 
-# search command -
-    @commands.command(
-        name = "search",
-        aliases=["find","sr"],
-        help=" -Предоставляет список результатов поиска YouTube."
-    )
-    async def search(self, ctx, *args):
-        search = "".join(args)
-        songNames = []
-        selectionOptions = []
-        embedText = ""
+# # search command -
+    # @commands.command(
+    #     name = "search",
+    #     aliases=["find","sr"],
+    #     help=" -Предоставляет список результатов поиска YouTube."
+    # )
+    # async def search(self, ctx, *args):
+    #     search = "".join(args)
+    #     songNames = []
+    #     selectionOptions = []
+    #     embedText = ""
 
-        if not args:
-            await ctx.send("Укажите условия поиска")
-            return
-        try:
-            userChannel = ctx.author.voice.channel
-        except:
-            await ctx.send("Вы должны находиться в голосовом канале")
-            return
+    #     if not args:
+    #         await ctx.send("Укажите условия поиска")
+    #         return
+    #     try:
+    #         userChannel = ctx.author.voice.channel
+    #     except:
+    #         await ctx.send("Вы должны находиться в голосовом канале")
+    #         return
 
-        await ctx.send("Получение результатов поиска . . .")
+    #     await ctx.send("Получение результатов поиска . . .")
 
-        songTokens = self.search_YT(search)
+    #     songTokens = self.search_YT(search)
 
-        for i, token in enumerate(songTokens):
-            url = 'https://www.youtube.com/watch?v=' + token
-            name = self.get_YT_title(token)
-            songNames.append(name)
-            embedText += f"{i+1} - [{name}]({url})\n"
+    #     for i, token in enumerate(songTokens):
+    #         url = 'https://www.youtube.com/watch?v=' + token
+    #         name = self.get_YT_title(token)
+    #         songNames.append(name)
+    #         embedText += f"{i+1} - [{name}]({url})\n"
             
-        for i, title in enumerate(songNames):
-            selectionOptions.append(SelectOption(
-                label=f"{i+1} - {title[:95]}", value=i))
+    #     for i, title in enumerate(songNames):
+    #         selectionOptions.append(SelectOption(
+    #             label=f"{i+1} - {title[:95]}", value=i))
 
-        searchResults = discord.Embed(
-            title="Результаты поиска",
-            description=embedText,
-            colour=self.embedRed
-        )
-        selectionComponents = [
-            Select(
-                placeholder="Опции выбора",
-                options=selectionOptions
-            ),
-            Button(
-                label = "Отменить",
-                custom_id = "Отменить",
-                style = 4
-            )
-        ]
-        message = await ctx.send(embed = searchResults, components = selectionComponents)
-        try:
-            tasks = [
-                asyncio.create_task(self.bot.wait_for(
-                    "button_click",
-                    timeout = 60.0,
-                    check = None
-                ),name = "button"),
-                asyncio.create_task(self.bot.wait_for(
-                    "select_option",
-                    timeout = 60.0,
-                    check = None
-                ),name = "select")
-            ]
-            done, pending = await asyncio.wait(tasks, return_when = asyncio.FIRST_COMPLETED)
-            finished = list(done)[0]
+    #     searchResults = discord.Embed(
+    #         title="Результаты поиска",
+    #         description=embedText,
+    #         colour=self.embedRed
+    #     )
+    #     selectionComponents = [
+    #         Select(
+    #             placeholder="Опции выбора",
+    #             options=selectionOptions
+    #         ),
+    #         Button(
+    #             label = "Отменить",
+    #             custom_id = "Отменить",
+    #             style = 4
+    #         )
+    #     ]
+    #     message = await ctx.send(embed = searchResults, components = selectionComponents)
+    #     try:
+    #         tasks = [
+    #             asyncio.create_task(self.bot.wait_for(
+    #                 "button_click",
+    #                 timeout = 60.0,
+    #                 check = None
+    #             ),name = "button"),
+    #             asyncio.create_task(self.bot.wait_for(
+    #                 "select_option",
+    #                 timeout = 60.0,
+    #                 check = None
+    #             ),name = "select")
+    #         ]
+    #         done, pending = await asyncio.wait(tasks, return_when = asyncio.FIRST_COMPLETED)
+    #         finished = list(done)[0]
 
-            for task in pending:
-                try:
-                    task.cancel()
-                except asyncio.CancelledError:
-                    pass
+    #         for task in pending:
+    #             try:
+    #                 task.cancel()
+    #             except asyncio.CancelledError:
+    #                 pass
 
-            if finished == None:
-                searchResults.title = "НЕ найдено"
-                searchResults.description = ""
-                await message.delete()
-                await ctx.send(embed = searchResults)
-                return
+    #         if finished == None:
+    #             searchResults.title = "НЕ найдено"
+    #             searchResults.description = ""
+    #             await message.delete()
+    #             await ctx.send(embed = searchResults)
+    #             return
             
-            action = finished.get_name()
+    #         action = finished.get_name()
 
-            if action =="button":
-                searchResults.title = "НЕ найдено"
-                searchResults.description = ""
-                await message.delete()
-                await ctx.send(embed = searchResults)
-            elif action == "select":
-                result = finished.result()
-                chosenIndex = int(result.values[0])
-                songRef = self.extract_YT(songTokens[chosenIndex])
-                if type(songRef) == type(True):
-                    await ctx.send("НЕверный формат! Попробуйте другую фразу для поиска.")
-                    return
-                embedReponse = discord.Embed(
-                    title = f"Опция #{chosenIndex + 1} выбрана",
-                    description = f"[{songRef['title']}]({songRef['link']}) добавлены в очередь!",
-                    colour = self.embedRed
-                )
-                embedReponse.set_thumbnail(url=songRef['thumbnail'])
-                await message.delete()
-                await ctx.send(embed=embedReponse)
-                self.musicQueue[ctx.guild.id].append([songRef, userChannel])
-        except:
-            searchResults.title = "НЕ найдено"
-            searchResults.description = ""
-            await message.delete()
-            await ctx.send(embed = searchResults)
+    #         if action =="button":
+    #             searchResults.title = "НЕ найдено"
+    #             searchResults.description = ""
+    #             await message.delete()
+    #             await ctx.send(embed = searchResults)
+    #         elif action == "select":
+    #             result = finished.result()
+    #             chosenIndex = int(result.values[0])
+    #             songRef = self.extract_YT(songTokens[chosenIndex])
+    #             if type(songRef) == type(True):
+    #                 await ctx.send("НЕверный формат! Попробуйте другую фразу для поиска.")
+    #                 return
+    #             embedReponse = discord.Embed(
+    #                 title = f"Опция #{chosenIndex + 1} выбрана",
+    #                 description = f"[{songRef['title']}]({songRef['link']}) добавлены в очередь!",
+    #                 colour = self.embedRed
+    #             )
+    #             embedReponse.set_thumbnail(url=songRef['thumbnail'])
+    #             await message.delete()
+    #             await ctx.send(embed=embedReponse)
+    #             self.musicQueue[ctx.guild.id].append([songRef, userChannel])
+    #     except:
+    #         searchResults.title = "НЕ найдено"
+    #         searchResults.description = ""
+    #         await message.delete()
+    #         await ctx.send(embed = searchResults)
+
+
+
+# # resume command +-
+#     @commands.command(
+#         name = "resume",
+#         aliases=["re"],
+#         help=" -Возобновляет приостановленную песню."
+#     )
+#     async def pause(self, ctx):
+#         id = int(ctx.guild.id)
+#         if not self.vc[id]:
+#             await ctx.send("Нет музыки на паузе")
+#         elif self.is_paused[id]:
+#             self.is_playing[id] = True
+#             self.is_paused[id] = False
+#             self.vc[id].resume()
+#             await ctx.send("Воспроизведение продолжено")
 
 # pause command -
     @commands.command(
         name = "pause",
         aliases=["stop","pa"],
-        help=" -Приостанавливает воспроизведение текущей песни"
+        help=" -Приостанавливает воспроизведение текущей песни."
     )
     async def pause(self, ctx):
         id = int(ctx.guild.id)
         if not self.vc[id]:
             await ctx.send("Нечего паузить!")
         elif self.is_playing[id]:
-            await ctx.send("Воспроизведение приостановлено")
             self.is_playing[id] = False
             self.is_paused[id] = True
-            self.vc[id].pause()    
-
-# resume command +-
-    @commands.command(
-        name = "resume",
-        aliases=["re"],
-        help=" -Возобновляет приостановленную песню"
-    )
-    async def pause(self, ctx):
-        id = int(ctx.guild.id)
-        if not self.vc[id]:
-            await ctx.send("Нет музыки на паузе")
-        elif self.is_paused[id]:
-            await ctx.send("Воспроизведение продолжено")
-            self.is_playing[id] = True
-            self.is_paused[id] = False
-            self.vc[id].resume()
+            self.vc[id].pause()
+            await ctx.send("Пауза")               
 
 # previous command +
     @commands.command(
         name = "previous",
         aliases=["pre", "pr"],
-        help=" -Воспроизводит предыдущую песню в очереди"
+        help=" -Воспроизводит предыдущую песню в очереди."
     )
     async def previous(self, ctx):
         id = int(ctx.guild.id)
@@ -488,6 +495,10 @@ class music_cog(commands.Cog):
             await ctx.send("В очереди НЕТ песен")
             return
         
+        if len(self.musicQueue[id]) <= self.queueIndex[id]:
+            await ctx.send("Вы достигли конца очереди.")
+            return
+        
         for i in range(self.queueIndex[id], len(self.musicQueue[id])):
             upNextSongs = len(self.musicQueue[id]) - self.queueIndex[id]
             if i > 5 + upNextSongs:
@@ -529,13 +540,13 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "join",
         aliases=["j"],
-        help=" -Подключает Бота к голосовому каналу"
+        help=" -Подключает Бота к голосовому каналу."
     )
     async def join(self, ctx):
         if ctx.author.voice:
             userChannel = ctx.author.voice.channel
-            await ctx.send(f'Music8_byAvetto вошел в канал: {userChannel}')
             await self.join_VC(ctx, userChannel)
+            await ctx.send(f'Music8_byAvetto вошел в канал: {userChannel}')
         else:
             await ctx.send("Вам нужно находиться в голосовом канале!")
 
