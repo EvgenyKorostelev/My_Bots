@@ -40,7 +40,7 @@ class music_cog(commands.Cog):
             self.queueIndex[id] = 0
             self.vc[id] = None
             self.is_paused[id] = self.is_playing[id] = False
-            print("Бот 8™ АКТИВИРОВАН !!!")
+            print(f"Бот 8™ АКТИВИРОВАН !!! на: {guild}")
 
 # leave if all leave +
     @commands.Cog.listener()

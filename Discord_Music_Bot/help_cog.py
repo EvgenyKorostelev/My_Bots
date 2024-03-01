@@ -6,22 +6,22 @@ class help_cog(commands.Cog):
         self.bot = bot
         self.embedOrange = 0xeab148
 
-# ready status
-    @commands.Cog.listener()
-    async def on_ready(self):
-        sendToChannels = []
-        for guild in self.bot.guilds:
-            channel = guild.text_channels[0]
-            sendToChannels.append(channel)
-        helloEmbed = discord.Embed(
-            title = "Здарова бандиты!",
-            description = f"""Я 8™_Бот, для проигрывания музыки с Youtube!
-                            Мой префикс **`+`**, для использования команд.
-                            Используйте **`+help`**, для получения списка команд.""",
-            colour = self.embedOrange
-        )
-        for channel in sendToChannels:
-            await channel.send(embed = helloEmbed)
+# # ready status
+#     @commands.Cog.listener()
+#     async def on_ready(self):
+#         sendToChannels = []
+#         for guild in self.bot.guilds:
+#             channel = guild.text_channels[0]
+#             sendToChannels.append(channel)
+#         helloEmbed = discord.Embed(
+#             title = "Здарова бандиты!",
+#             description = f"""Я 8™_Бот, для проигрывания музыки с Youtube!
+#                             Мой префикс **`+`**, для использования команд.
+#                             Используйте **`+help`**, для получения списка команд.""",
+#             colour = self.embedOrange
+#         )
+#         for channel in sendToChannels:
+#             await channel.send(embed = helloEmbed)
 
 # help command
     @commands.command(
