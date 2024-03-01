@@ -40,6 +40,7 @@ class music_cog(commands.Cog):
             self.queueIndex[id] = 0
             self.vc[id] = None
             self.is_paused[id] = self.is_playing[id] = False
+            print("Бот 8™ АКТИВИРОВАН !!!")
 
 # leave if all leave +
     @commands.Cog.listener()
@@ -425,6 +426,21 @@ class music_cog(commands.Cog):
 #             self.vc[id].resume()
 #             await ctx.send("Воспроизведение продолжено")
 
+
+# # repeat mod command 
+#     @commands.command(
+#         name = "repeat",
+#         aliases=["rpt","re"],
+#         help=" -Включает репит мод."
+#     ) 
+#     async def repeat_mod(self, ctx, mode: str):
+#         id = int(ctx.guild.id)
+#         if not self.vc[id]:
+#             await ctx.send("Нечего репитить!")
+#         elif self.is_playing[id]:   
+        
+
+
 # pause command +
     @commands.command(
         name = "pause",
@@ -434,12 +450,15 @@ class music_cog(commands.Cog):
     async def pause(self, ctx):
         id = int(ctx.guild.id)
         if not self.vc[id]:
-            await ctx.send("Нечего паузить!")
-        elif self.is_playing[id]:
-            self.is_playing[id] = False
-            self.is_paused[id] = True
-            self.vc[id].pause()
-            await ctx.send("Пауза")               
+            await ctx.send("Я не в канале!")
+        else:    
+            if not self.is_playing[id]:
+             await ctx.send("Нечего паузить!")
+            elif self.is_playing[id]:
+                self.is_playing[id] = False
+                self.is_paused[id] = True
+                self.vc[id].pause()
+                await ctx.send("Пауза")               
 
 # previous command +
     @commands.command(
