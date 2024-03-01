@@ -202,11 +202,11 @@ class music_cog(commands.Cog):
             self.is_playing[id] = False
 
 # COMMANDS
-# play command +
+# play/resume command +
     @commands.command(
         name = "play",
         aliases=["pl"],
-        help=" -Воспроизводит (или возобновляет) песню с YouTube."
+        help=" -Воспроизводит (или возобновляет) песню."
     )
     async def play(self, ctx, *args):
         search = " ".join(args)
@@ -485,7 +485,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "queue",
         aliases=["list", "q"],
-        help=" -Перечисляет следующие несколько песен в очереди."
+        help=" -Показывает следующие несколько песен в очереди."
     )
     async def queue(self, ctx):
         id = int(ctx.guild.id)
@@ -495,7 +495,7 @@ class music_cog(commands.Cog):
             return
         
         if len(self.musicQueue[id]) <= self.queueIndex[id]:
-            await ctx.send("Вы достигли конца очереди.")
+            await ctx.send("Вы достигли КОНЦА очереди.")
             return
         
         for i in range(self.queueIndex[id], len(self.musicQueue[id])):
@@ -523,7 +523,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "clear",
         aliases=["cl"],
-        help=" -Удаляет все песни из очереди."
+        help=" -Удаляет ВСЕ песни из очереди."
     )
     async def clear(self, ctx):
         id = int(ctx.guild.id)
