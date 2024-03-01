@@ -4,18 +4,12 @@ from help_cog import help_cog
 import asyncio
 from discord.ext import commands
 import discord
-# from discord import Activity, ActivityType
-
-# intents = discord.Intents.default()
-# intents.message_content = True
 
 
 bot = commands.Bot(command_prefix = '+', intents=discord.Intents.all())
 
-
 with open('token.txt', 'r') as file:
     token = file.readlines()[0]
-
 
 async def main():
     async with bot:

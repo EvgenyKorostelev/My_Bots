@@ -9,8 +9,6 @@ import os
 from youtube_dl import YoutubeDL
 
 
-
-
 class music_cog(commands.Cog):
 
     def __init__(self, bot):
@@ -137,7 +135,8 @@ class music_cog(commands.Cog):
         htmContent = request.urlopen('https://www.youtube.com/results?' + queryString)
         searchResults = re.findall(r'/watch\?v=(.{11})', htmContent.read().decode())
         return searchResults[0:10]
-#     
+    
+# extact_info +    
     def extract_YT(self, url):
         with YoutubeDL(self.YTDL_OPTIONS) as ydl:
             try:
@@ -410,7 +409,7 @@ class music_cog(commands.Cog):
 
 
 
-# # resume command +-
+# # resume command -
 #     @commands.command(
 #         name = "resume",
 #         aliases=["re"],
@@ -426,7 +425,7 @@ class music_cog(commands.Cog):
 #             self.vc[id].resume()
 #             await ctx.send("Воспроизведение продолжено")
 
-# pause command -
+# pause command +
     @commands.command(
         name = "pause",
         aliases=["stop","pa"],
