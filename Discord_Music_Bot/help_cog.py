@@ -15,7 +15,9 @@ class help_cog(commands.Cog):
             sendToChannels.append(channel)
         helloEmbed = discord.Embed(
             title = "Здарова бандиты!",
-            description = """Я 8™_Бот, для проигрывания музыки с Youtube! Мой префикс **`+`**, для использования команд. Используйте **`+help`**, для получения списка команд.""",
+            description = f"""Я 8™_Бот, для проигрывания музыки с Youtube!
+                            Мой префикс **`+`**, для использования команд.
+                            Используйте **`+help`**, для получения списка команд.""",
             colour = self.embedOrange
         )
         for channel in sendToChannels:
