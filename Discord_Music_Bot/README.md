@@ -10,3 +10,4 @@
 * ```pip install youtube-dl```
 * ```pip install urllib3```
 * ```FFmpeg```
+* ```Python\Python312\Lib\site-packages\youtube_dl\extractor\youtube.py - 1794 line commit or delete ```
