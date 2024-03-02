@@ -31,7 +31,7 @@ class music_cog(commands.Cog):
         self.vc = {}
 
 # FUNCTIONS
-# ready +     
+# ready parametrs +     
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
@@ -72,6 +72,23 @@ class music_cog(commands.Cog):
         embed.set_thumbnail(url=THUMBNAIL)
         embed.set_footer(text=f"Песню добавил: {str(AUTHOR)}", icon_url=AVATAR)
         return embed
+    
+# now playing for repeat +
+    def now_playing_repeat_embed(self, ctx, song):
+        TITLE = song['title']
+        LINK = song['link']
+        THUMBNAIL = song['thumbnail']
+        AUTHOR = ctx.author
+        AVATAR  = AUTHOR.avatar
+
+        embed = discord.Embed(
+            title = "Сейчас поёт на РИПИТЕ ! ! !:",
+            description = f'[{TITLE}]({LINK})',
+            colour = self.embedBlue,
+        )
+        embed.set_thumbnail(url=THUMBNAIL)
+        embed.set_footer(text=f"Песню добавил: {str(AUTHOR)}", icon_url=AVATAR)
+        return embed    
     
 # added song +
     def added_song_embed(self, ctx, song):
@@ -181,6 +198,37 @@ class music_cog(commands.Cog):
             self.queueIndex[id] += 1
             self.is_playing[id] = False
 
+# play next repeat song +  
+    def play_next_repeat(self, ctx):
+        id = int(ctx.guild.id)
+        if not self.is_playing[id]:
+            return
+        if len(self.musicQueue[id]) == 1:
+            self.is_playing[id] = True
+            song = self.musicQueue[id][self.queueIndex[id]][0]
+            self.vc[id].play(discord.FFmpegPCMAudio(
+                song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next_repeat(ctx))
+            
+        elif len(self.musicQueue[id]) > 1 and self.queueIndex[id] + 1 < len(self.musicQueue[id]):
+            self.is_playing[id] = True
+            self.queueIndex[id] += 1
+
+            song = self.musicQueue[id][self.queueIndex[id]][0]
+            
+            self.vc[id].play(discord.FFmpegPCMAudio(
+                song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next_repeat(ctx))
+            
+        elif len(self.musicQueue[id]) > 1 and self.queueIndex[id] == len(self.musicQueue[id]) - 1:
+            self.is_playing[id] = True
+            self.queueIndex[id] = 0
+
+            song = self.musicQueue[id][self.queueIndex[id]][0]
+            
+
+            self.vc[id].play(discord.FFmpegPCMAudio(
+                song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next_repeat(ctx))       
+                    
+
 # play music +
     async def play_music(self, ctx):
         id = int(ctx.guild.id)
@@ -201,6 +249,30 @@ class music_cog(commands.Cog):
             await ctx.send("В очереди на воспроизведение нет песен!")
             self.queueIndex[id] += 1
             self.is_playing[id] = False
+
+# play music repeat +
+    async def play_music_repeat(self, ctx):
+        id = int(ctx.guild.id)
+        if self.queueIndex[id] < len(self.musicQueue[id]):
+            self.is_playing[id] = True
+            self.is_paused[id] = False
+            self.vc[id] = await self.join_VC(ctx, self.musicQueue[id][self.queueIndex[id]][1])
+            song = self.musicQueue[id][self.queueIndex[id]][0]
+            message = self.now_playing_repeat_embed(ctx, song)
+            await ctx.send(embed = message)
+            
+            self.vc[id] = ctx.guild.voice_client
+           
+            self.vc[id].play(discord.FFmpegPCMAudio(
+                song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next_repeat(ctx))
+            
+        else:
+            await ctx.send("В очереди на воспроизведение нет песен!")
+            self.queueIndex[id] += 1
+            self.is_playing[id] = False
+
+
+
 
 # COMMANDS
 # play/resume command +
@@ -427,19 +499,46 @@ class music_cog(commands.Cog):
 #             await ctx.send("Воспроизведение продолжено")
 
 
-# # repeat mod command 
-#     @commands.command(
-#         name = "repeat",
-#         aliases=["rpt","re"],
-#         help=" -Включает репит мод."
-#     ) 
-#     async def repeat_mod(self, ctx, mode: str):
-#         id = int(ctx.guild.id)
-#         if not self.vc[id]:
-#             await ctx.send("Нечего репитить!")
-#         elif self.is_playing[id]:   
-        
-
+# repeat mod command +
+    @commands.command(
+        name = "repeat",
+        aliases=["rpt"],
+        help=" -Включает репит мод на всю очередь."
+    ) 
+    async def repeat(self, ctx, *args):
+        search = " ".join(args)
+        id = int(ctx.guild.id)
+        try:
+            userChannel = ctx.author.voice.channel
+        except:
+            await ctx.send("Вам нужно находиться в голосовом канале!")
+            return
+        if not args:
+            if len(self.musicQueue[id]) == 0:
+                await ctx.send("Список воспроизведения пуст!")
+                return
+            elif not self.is_playing[id] and not self.is_paused[id]:
+                if self.musicQueue[id] == None or self.vc[id] == None:
+                    await self.play_music_repeat(ctx)
+                else:
+                    self.is_paused[id] = False
+                    self.is_playing[id] = True
+                    await self.play_music_repeat(ctx)
+            elif not self.is_playing[id] and self.is_paused[id]:
+                self.is_playing[id] = True
+                self.is_paused[id] = False
+                self.vc[id].resume()
+                await ctx.send("Возобновлено")
+            else:
+                return
+        else:
+            song = self.extract_YT(self.search_YT(search)[0])
+            if type(song) == type(True):
+                await ctx.send("НЕ нашел! Попробуйте другую фразу для поиска.")
+            else:
+                self.musicQueue[id].append([song, userChannel])
+                if not self.is_playing[id]:
+                    await self.play_music_repeat(ctx) 
 
 # pause command +
     @commands.command(
@@ -453,7 +552,7 @@ class music_cog(commands.Cog):
             await ctx.send("Я не в канале!")
         else:    
             if not self.is_playing[id]:
-             await ctx.send("Нечего паузить!")
+                await ctx.send("Нечего паузить!")
             elif self.is_playing[id]:
                 self.is_playing[id] = False
                 self.is_paused[id] = True
