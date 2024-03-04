@@ -65,7 +65,7 @@ class music_cog(commands.Cog):
         AVATAR  = AUTHOR.avatar
 
         embed = discord.Embed(
-            title = "Сейчас поёт:",
+            title = "▶️ Сейчас играет:",
             description = f'[{TITLE}]({LINK})',
             colour = self.embedBlue,
         )
@@ -82,7 +82,7 @@ class music_cog(commands.Cog):
         AVATAR  = AUTHOR.avatar
 
         embed = discord.Embed(
-            title = "Сейчас поёт на РИПИТЕ ! ! !:",
+            title = "Сейчас играет на ▶️🔁 РИПИТЕ ! ! !",
             description = f'[{TITLE}]({LINK})',
             colour = self.embedBlue,
         )
@@ -189,7 +189,7 @@ class music_cog(commands.Cog):
             self.vc[id].play(discord.FFmpegPCMAudio(
                 song['source'], **self.FFMPEG_OPTIONS), after = lambda e: self.play_next(ctx))
         else:
-            coro = ctx.send("Вы достигли конца очереди!")
+            coro = ctx.send("🔚 Вы достигли конца очереди!")
             fut = run_coroutine_threadsafe(coro, self.bot.loop)
             try:
                 fut.result()
@@ -279,7 +279,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "play",
         aliases=["pl"],
-        help=" -Воспроизводит (или возобновляет) песню."
+        help=" -▶️Воспроизводит (или возобновляет) песню."
     )
     async def play(self, ctx, *args):
         search = " ".join(args)
@@ -291,7 +291,7 @@ class music_cog(commands.Cog):
             return
         if not args:
             if len(self.musicQueue[id]) == 0:
-                await ctx.send("Список воспроизведения пуст!")
+                await ctx.send("В очереди на воспроизведение нет песен!")
                 return
             elif not self.is_playing[id] and not self.is_paused[id]:
                 if self.musicQueue[id] == None or self.vc[id] == None:
@@ -304,7 +304,7 @@ class music_cog(commands.Cog):
                 self.is_playing[id] = True
                 self.is_paused[id] = False
                 self.vc[id].resume()
-                await ctx.send("Возобновлено")
+                await ctx.send("▶️ Возобновлено")
             else:
                 return
         else:
@@ -357,7 +357,7 @@ class music_cog(commands.Cog):
             removeSongEmbed =  self.removed_song_embed(ctx, song)
             await ctx.send(embed=removeSongEmbed)
         else:
-            await ctx.send("В очереди НЕТ песен")
+            await ctx.send("В очереди на воспроизведение нет песен!")
         self.musicQueue[id] = self.musicQueue[id][:-1]
         if self.musicQueue[id] == []:
             if self.vc[id] != None and self.is_playing[id]:
@@ -503,7 +503,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "repeat",
         aliases=["rpt"],
-        help=" -Включает репит мод на всю очередь."
+        help=" -▶️🔁Включает репит мод на всю очередь."
     ) 
     async def repeat(self, ctx, *args):
         search = " ".join(args)
@@ -515,7 +515,7 @@ class music_cog(commands.Cog):
             return
         if not args:
             if len(self.musicQueue[id]) == 0:
-                await ctx.send("Список воспроизведения пуст!")
+                await ctx.send("В очереди на воспроизведение нет песен!")
                 return
             elif not self.is_playing[id] and not self.is_paused[id]:
                 if self.musicQueue[id] == None or self.vc[id] == None:
@@ -524,11 +524,11 @@ class music_cog(commands.Cog):
                     self.is_paused[id] = False
                     self.is_playing[id] = True
                     await self.play_music_repeat(ctx)
-            elif not self.is_playing[id] and self.is_paused[id]:
-                self.is_playing[id] = True
-                self.is_paused[id] = False
-                self.vc[id].resume()
-                await ctx.send("Возобновлено")
+            # elif not self.is_playing[id] and self.is_paused[id]:
+            #     self.is_playing[id] = True
+            #     self.is_paused[id] = False
+            #     self.vc[id].resume()
+            #     await ctx.send("▶️ Возобновлено")
             else:
                 return
         else:
@@ -544,7 +544,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "pause",
         aliases=["stop","pa"],
-        help=" -Приостанавливает воспроизведение текущей песни."
+        help=" -⏸️Приостанавливает воспроизведение текущей песни."
     )
     async def pause(self, ctx):
         id = int(ctx.guild.id)
@@ -557,13 +557,13 @@ class music_cog(commands.Cog):
                 self.is_playing[id] = False
                 self.is_paused[id] = True
                 self.vc[id].pause()
-                await ctx.send("Пауза")               
+                await ctx.send("⏸️ Пауза")               
 
 # previous command +
     @commands.command(
         name = "previous",
         aliases=["pre", "pr"],
-        help=" -Воспроизводит предыдущую песню в очереди."
+        help=" -⏮️Воспроизводит предыдущую песню в очереди."
     )
     async def previous(self, ctx):
         id = int(ctx.guild.id)
@@ -583,7 +583,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "skip",
         aliases=["sk"],
-        help=" -Переход к следующей песне в очереди."
+        help=" -⏭️Воспроизводит следующую песню в очереди."
     )
     async def skip(self, ctx):
         id = int(ctx.guild.id)
@@ -603,17 +603,17 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "queue",
         aliases=["list", "q"],
-        help=" -Показывает следующие несколько песен в очереди."
+        help=" -📜Показывает несколько песен в очереди."
     )
     async def queue(self, ctx):
         id = int(ctx.guild.id)
         returnValue = ""
         if self.musicQueue[id] ==[]:
-            await ctx.send("В очереди НЕТ песен")
+            await ctx.send("В очереди на воспроизведение нет песен!")
             return
         
         if len(self.musicQueue[id]) <= self.queueIndex[id]:
-            await ctx.send("Вы достигли КОНЦА очереди.")
+            await ctx.send("🔚 Вы достигли конца очереди!")
             return
         
         for i in range(self.queueIndex[id], len(self.musicQueue[id])):
@@ -622,13 +622,13 @@ class music_cog(commands.Cog):
                 break
             returnIndex = i - self.queueIndex[id]
             if returnIndex == 0:
-                returnIndex = "Сейчас играет"
+                returnIndex = "▶️ Сейчас играет"
             elif returnIndex == 1:
-                returnIndex = "Следущая"
+                returnIndex = "⏭️ Следующая"
             returnValue += f"{returnIndex} - [{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['link']})\n"    
 
             if returnValue == "":
-                await ctx.send("В очереди НЕТ песен")
+                await ctx.send("В очереди на воспроизведение нет песен!")
                 return
         queue = discord.Embed(
             title ="Песни в очереди",

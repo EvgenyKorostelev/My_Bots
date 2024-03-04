@@ -6,7 +6,7 @@ class help_cog(commands.Cog):
         self.bot = bot
         self.embedOrange = 0xeab148
 
-# # ready status
+# # ready status +
 #     @commands.Cog.listener()
 #     async def on_ready(self):
 #         sendToChannels = []
@@ -23,11 +23,11 @@ class help_cog(commands.Cog):
 #         for channel in sendToChannels:
 #             await channel.send(embed = helloEmbed)
 
-# help command
+# help command +
     @commands.command(
         name = "help",
         aliases = ["h"],
-        help = " -Предоставляет описание всех указанных команд."
+        help = " -📜Предоставляет описание всех указанных команд."
     )
     async def help(self, ctx):
         helpCog = self.bot.get_cog('help_cog')
