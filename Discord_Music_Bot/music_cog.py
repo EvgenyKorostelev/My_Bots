@@ -26,7 +26,7 @@ class music_cog(commands.Cog):
         self.embedBlue = 0x2c76dd
         self.embedRed = 0xdf1141
         self.embedGreen = 0x0eaa51
-        # self.embedMyColor = 0x290000
+        self.embedMyColor = 0x290000
 
         self.vc = {}
 
@@ -67,7 +67,7 @@ class music_cog(commands.Cog):
         embed = discord.Embed(
             title = "▶️ Сейчас играет:",
             description = f'[{TITLE}]({LINK})',
-            colour = self.embedBlue,
+            colour = self.embedMyColor,
         )
         embed.set_thumbnail(url=THUMBNAIL)
         embed.set_footer(text=f"Песню добавил: {str(AUTHOR)}", icon_url=AVATAR)
@@ -84,7 +84,7 @@ class music_cog(commands.Cog):
         embed = discord.Embed(
             title = "Сейчас играет на ▶️🔁 РИПИТЕ ! ! !",
             description = f'[{TITLE}]({LINK})',
-            colour = self.embedBlue,
+            colour = self.embedMyColor,
         )
         embed.set_thumbnail(url=THUMBNAIL)
         embed.set_footer(text=f"Песню добавил: {str(AUTHOR)}", icon_url=AVATAR)
@@ -101,7 +101,7 @@ class music_cog(commands.Cog):
         embed = discord.Embed(
             title = "Добавлено в очередь:",
             description = f'[{TITLE}]({LINK})',
-            colour = self.embedRed,
+            colour = self.embedMyColor,
         )
         embed.set_thumbnail(url=THUMBNAIL)
         embed.set_footer(text=f'Песню добавил: {str(AUTHOR)}', icon_url=AVATAR)
@@ -118,7 +118,7 @@ class music_cog(commands.Cog):
         embed = discord.Embed(
             title = "Удалена из очереди:",
             description = f'[{TITLE}]({LINK})',
-            colour = self.embedRed,
+            colour = self.embedMyColor,
         )
         embed.set_thumbnail(url=THUMBNAIL)
         embed.set_footer(
@@ -408,7 +408,7 @@ class music_cog(commands.Cog):
     #     searchResults = discord.Embed(
     #         title="Результаты поиска",
     #         description=embedText,
-    #         colour=self.embedRed
+    #         colour=self.embedMyColor
     #     )
     #     selectionComponents = [
     #         Select(
@@ -468,7 +468,7 @@ class music_cog(commands.Cog):
     #             embedReponse = discord.Embed(
     #                 title = f"Опция #{chosenIndex + 1} выбрана",
     #                 description = f"[{songRef['title']}]({songRef['link']}) добавлены в очередь!",
-    #                 colour = self.embedRed
+    #                 colour = self.embedMyColor
     #             )
     #             embedReponse.set_thumbnail(url=songRef['thumbnail'])
     #             await message.delete()
@@ -603,7 +603,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "queue",
         aliases=["list", "q"],
-        help=" -📜Показывает несколько песен в очереди."
+        help=" -Показывает несколько песен в очереди."
     )
     async def queue(self, ctx):
         id = int(ctx.guild.id)
@@ -633,7 +633,7 @@ class music_cog(commands.Cog):
         queue = discord.Embed(
             title ="Песни в очереди",
             description = returnValue,
-            colour = self.embedGreen
+            colour = self.embedMyColor
         )
         await ctx.send(embed = queue)
 

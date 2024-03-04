@@ -5,6 +5,7 @@ class help_cog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.embedOrange = 0xeab148
+        self.embedMyColor = 0x290000
 
 # # ready status +
 #     @commands.Cog.listener()
@@ -18,7 +19,7 @@ class help_cog(commands.Cog):
 #             description = f"""Я 8™_Бот, для проигрывания музыки с Youtube!
 #                             Мой префикс **`+`**, для использования команд.
 #                             Используйте **`+help`**, для получения списка команд.""",
-#             colour = self.embedOrange
+#             colour = self.embedMyColor
 #         )
 #         for channel in sendToChannels:
 #             await channel.send(embed = helloEmbed)
@@ -40,6 +41,6 @@ class help_cog(commands.Cog):
         commandsEmbed = discord.Embed(
             title = "Список команд",
             description = commandDescription,
-            colour = self.embedOrange
+            colour = self.embedMyColor
         )
         await ctx.send(embed = commandsEmbed)
