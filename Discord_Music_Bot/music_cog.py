@@ -279,7 +279,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "play",
         aliases=["pl"],
-        help=" -▶️Воспроизводит (или возобновляет) песню."
+        help="▶️Воспроизводит (или возобновляет) песню."
     )
     async def play(self, ctx, *args):
         search = " ".join(args)
@@ -323,7 +323,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "add",
         aliases=["a"],
-        help=" -Добавляет первый результат поиска в очередь."
+        help="Добавляет первый результат поиска в очередь."
     )
     async def add(self, ctx, *args):
         search = " ".join(args)
@@ -348,7 +348,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "remove",
         aliases=["rm"],
-        help=" -Удаляет последнюю песню в очереди."
+        help="Удаляет последнюю песню в очереди."
     )
     async def remove(self, ctx):
         id = int(ctx.guild.id)
@@ -503,7 +503,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "repeat",
         aliases=["rpt"],
-        help=" -▶️🔁Включает репит мод на всю очередь."
+        help="▶️🔁Включает репит мод на всю очередь."
     ) 
     async def repeat(self, ctx, *args):
         search = " ".join(args)
@@ -544,7 +544,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "pause",
         aliases=["stop","pa"],
-        help=" -⏸️Приостанавливает воспроизведение текущей песни."
+        help="⏸️Приостанавливает воспроизведение."
     )
     async def pause(self, ctx):
         id = int(ctx.guild.id)
@@ -563,7 +563,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "previous",
         aliases=["pre", "pr"],
-        help=" -⏮️Воспроизводит предыдущую песню в очереди."
+        help="⏮️Воспроизводит предыдущую песню."
     )
     async def previous(self, ctx):
         id = int(ctx.guild.id)
@@ -583,7 +583,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "skip",
         aliases=["sk"],
-        help=" -⏭️Воспроизводит следующую песню в очереди."
+        help="⏭️Воспроизводит следующую песню."
     )
     async def skip(self, ctx):
         id = int(ctx.guild.id)
@@ -603,7 +603,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "queue",
         aliases=["list", "q"],
-        help=" -Показывает несколько песен в очереди."
+        help="Показывает несколько песен в очереди."
     )
     async def queue(self, ctx):
         id = int(ctx.guild.id)
@@ -641,7 +641,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "clear",
         aliases=["cl"],
-        help=" -Удаляет ВСЕ песни из очереди."
+        help="Удаляет ВСЕ песни из очереди."
     )
     async def clear(self, ctx):
         id = int(ctx.guild.id)
@@ -657,7 +657,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "join",
         aliases=["j"],
-        help=" -Подключает Бота к голосовому каналу."
+        help="Подключает Бота к голосовому каналу."
     )
     async def join(self, ctx):
         if ctx.author.voice:
@@ -671,7 +671,7 @@ class music_cog(commands.Cog):
     @commands.command(
         name = "leave",
         aliases=["l"],
-        help=" -Удаляет Бота из голосового канала и очищает очередь."
+        help="Удаляет Бота из голосового канала и очищает очередь."
     )
     async def leave(self, ctx):
         id = int(ctx.guild.id)

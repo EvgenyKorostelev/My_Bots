@@ -28,7 +28,7 @@ class help_cog(commands.Cog):
     @commands.command(
         name = "help",
         aliases = ["h"],
-        help = " -📜Предоставляет описание всех указанных команд."
+        help = "📜Предоставляет описание всех указанных команд."
     )
     async def help(self, ctx):
         helpCog = self.bot.get_cog('help_cog')
@@ -37,7 +37,7 @@ class help_cog(commands.Cog):
         commandDescription = ""
 
         for c in commands:
-            commandDescription += f"**`+{c.name} или {c.aliases}`** {c.help}\n"
+            commandDescription += f"**`+{c.name} или {c.aliases}`** - {c.help}\n"
         commandsEmbed = discord.Embed(
             title = "Список команд",
             description = commandDescription,
