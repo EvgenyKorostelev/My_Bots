@@ -37,7 +37,7 @@ class help_cog(commands.Cog):
         commandDescription = ""
 
         for c in commands:
-            commandDescription += f"**`+{c.name}`** {c.help}\n"
+            commandDescription += f"**`+{c.name} или {c.aliases}`** {c.help}\n"
         commandsEmbed = discord.Embed(
             title = "Список команд",
             description = commandDescription,
