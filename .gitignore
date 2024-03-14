@@ -456,4 +456,8 @@ $RECYCLE.BIN/
 C#.sln
 
 ## My
+.pylintrc
 token.txt
+to_Json/
+censor_dict.txt
+to_json.py

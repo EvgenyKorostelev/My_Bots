@@ -4,6 +4,7 @@ from discord.ext import commands
 class help_cog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
         self.embedOrange = 0xeab148
         self.embedMyColor = 0x290000
 
