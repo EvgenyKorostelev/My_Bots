@@ -52,7 +52,7 @@ class music_cog(commands.Cog):
         id = int(member.guild.id)
         if (
             member.id != self.bot.user.id
-            and before.channel == None
+            and before.channel != None
             and after.channel != before.channel
         ):
             remainingChannelMembers = before.channel.members
