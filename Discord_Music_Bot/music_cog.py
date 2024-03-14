@@ -92,12 +92,13 @@ class music_cog(commands.Cog):
         TITLE = song["title"]
         LINK = song["link"]
         THUMBNAIL = song["thumbnail"]
+        DURATION = str(datetime.timedelta(seconds=song["duration"]))
         AUTHOR = ctx.author
         AVATAR = AUTHOR.avatar
 
         embed = discord.Embed(
             title="Сейчас играет на ▶️🔁 РЕПИТЕ ! ! !",
-            description=f"[{TITLE}]({LINK})",
+            description=f"[{TITLE}]({LINK}\nДлительность {DURATION})",
             colour=self.embedMyColor,
         )
         embed.set_thumbnail(url=THUMBNAIL)
