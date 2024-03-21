@@ -2,9 +2,9 @@
 
 import asyncio
 import discord
-from music_cog import music_cog
-from help_cog import help_cog
 from discord.ext import commands
+from music_cog import Music
+from help_cog import Help
 
 
 bot = commands.Bot(command_prefix="+", intents=discord.Intents.all())
@@ -14,11 +14,11 @@ with open("token.txt", "r", encoding="utf-8") as file:
 
 
 async def main():
-    """Delete help command, add cogs and start token"""
+    """Delete help command, add cogs and launch bot"""
     async with bot:
         bot.remove_command("help")
-        await bot.add_cog(music_cog(bot))
-        await bot.add_cog(help_cog(bot))
+        await bot.add_cog(Music(bot))
+        await bot.add_cog(Help(bot))
         await bot.start(token)
 
 
