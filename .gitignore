@@ -461,3 +461,4 @@ token.txt
 to_Json/
 censor_dict.txt
 to_json.py
+.env
